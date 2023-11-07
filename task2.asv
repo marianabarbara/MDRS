@@ -118,6 +118,22 @@ ylabel('Average VoIP packet delay (ms)');
 hold off
 
 %% 2 c)
+lambda = 1500; 
+C = 10;
+f = 1000000;
+P = 100000;
+N = 20;
+
+n = [10, 20, 30, 40];
+
+alpha = 0.1;
+PL_data = zeros(1,4);
+APD_data = zeros(1,4);
+MPD_data = zeros(1,4);
+PL_voip = zeros(1,4);
+APD_voip = zeros(1,4);
+MPD_voip = zeros(1,4);
+TT = zeros(1,4); 
 
 media_APD_data = zeros(1,4);
 media_APD_voip = zeros(1,4);
