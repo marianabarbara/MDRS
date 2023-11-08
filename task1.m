@@ -4,70 +4,46 @@ P = 100000;
 lambda = 1800;
 C = [10, 20, 30, 40];
 f = 1000000;
+N = 20;
+alpha=0.1;
+PL = zeros(1,4); 
+APD = zeros(1,4); 
+MPD = zeros(1,4); 
+TT = zeros(1,4);
 
-for index = 1:length(C)
-    N = 20;
-    alpha=0.1;
-    PL = zeros(1,N);
-    APD = zeros(1,N);
-    MPD = zeros(1,N);
-    TT = zeros(1,N);
-    
-    for i = 1:N
-        [PL(i), APD(i), MPD(i), TT(i)] = Simulator1(lambda,C(index),f,P);
-    end  
-    
-    fprintf('C = %d\n',C(index));
-   
-    mediaAPD = mean(APD);
-    termAPD = norminv(1-alpha/2)*sqrt(var(APD)/N);
-    fprintf('Av. Packet Delay (ms)= %.2e +-%.2e\n', mediaAPD, termAPD);
-    APD_Res(index) = mediaAPD;
-    APD_Err(index) = termAPD;
+media_APD = zeros(1,4);
+term_APD = zeros(1,4);
+for i= 1:length(C)
+ for it= 1:N
+ [PL(it), APD(it), MPD(it), TT(it)] = Simulator1(lambda,C(i),f,P);
+ end
+ media_APD(i) = mean(APD);
+ term_APD(i) = norminv(1-alpha/2)*sqrt(var(APD)/N);
 end
-
 figure(1);
-bar(C,APD_Res);
-grid on
-xlabel("Link bandwidth (Mbps)");
-ylabel("Packet Delay");
-title(["Average Packet Delay"]);
+bar(C,media_APD);
 hold on
-er = errorbar(C,APD_Resultsc,APD_Err,APD_Err);    
-er.Color = [0 0 0];                            
+er = errorbar(C,media_APD,term_APD);
+er.Color = [0 0 0];
 er.LineStyle = 'none';
+grid on
+title('Average Packet Delay');
+xlabel('Link bandwidth (Mbps)');
+ylabel('Average packet delay (ms)');
 hold off
+%% 1 b)
+media_APD = zeros(1,4);
+media_APD_2 = zeros(1,4);
 
-%% 1 b) - NÃO ESTÁ A DAR BEM, ACHO EU
-lambda = 1800;
-C = [10*10^6, 20*10^6, 30*10^6, 40*10^6];
-f = 1000000;
-N = 20;  
-
-x = 64:1518;
-
-prob = zeros(1,1518);
-prob(packetSize) = (1 - 0.19 - 0.23 -0.17) / (length(packetSize)-3);
-prob(64) = 0.19;
-prob(110) = 0.23;
-prob(1518) = 0.17;
-
-for index=1:numel(C)
-     
-    Spacket = x.*8./C(index);
-    Spacket2= Spacket.^2;
-    E = sum(prob(x).*Spacket);
-    E2 = sum(prob(x).*Spacket2);
-    avgPacketSize = sum(prob(x).*x);
-
-    APD_theo = (((lambda.*E2) ./ (2*(1-lambda.*E)))+E)*10^3; %converter em ms
-
-    fprintf('C = %.2e \n',C(index));
-    fprintf('Av. Packet Delay= %.2e \n',APD_theo);
+for i = 1:length(C)
+ for it= 1:N
+ media_APD_2 = Theo_Avg_Delay_MG1(lambda,C(i));
+ end
+ media_APD(i) = mean(media_APD_2);
 end
 
 figure(2);
-bar(C, APD_theo);
+bar(C,media_APD);
 hold on
 grid on
 title("Average Packet Deplay (MG1 queueing model)");
@@ -75,9 +51,239 @@ xlabel('Link bandwidth (Mbps)');
 ylabel('Average packet delay (ms)');
 hold off
 
-
 %% 1 c)
+lambda = [1000, 1300, 1600, 1900];
+C = 10;
+f = 1000000; 
+P = 100000; 
+N = 20;
+alpha = 0.1;
+
+PL = zeros(1, 4);
+APD = zeros(1,4);
+MPD = zeros(1,4);
+TT = zeros(1,4);
+
+media_APD = zeros(1,4);
+term_APD = zeros(1,4);
+media_TT = zeros(1,4);
+term_TT = zeros(1,4);
+
+for i = 1:length(lambda)
+    for it = 1:N
+        [PL(it), APD(it), MPD(it), TT(it)] = Simulator1(lambda(i), C, f, P);
+    end
+    media_APD(i) = mean(APD);
+    term_APD(i) = norminv(1 - alpha / 2) * sqrt(var(APD) / N);
+    media_TT(i) = mean(TT);
+    term_TT(i) = norminv(1 - alpha / 2) * sqrt(var(TT) / N);
+end
+
+figure(3);
+bar(lambda, media_APD);
+hold on
+er = errorbar(lambda, media_APD, term_APD);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Packet Delay');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average packet delay (ms)');
+hold off
+
+figure(4);
+bar(lambda, media_TT);
+hold on
+er = errorbar(lambda, media_TT, term_TT);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Throughput');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average throughput (Mbps)');
+hold off
 
 %% 1 d)
+lambda = [1000, 1300, 1600, 1900];
+C = 10;
+f = 1000000; 
+P = 100000; 
+N = 20;
+alpha = 0.1;
+b = 10^-5;
 
-%% 1 e)
+PL = zeros(1, 4);
+APD = zeros(1,4);
+MPD = zeros(1,4);
+TT = zeros(1,4);
+
+media_APD = zeros(1,4);
+term_APD = zeros(1,4);
+media_TT = zeros(1,4);
+term_TT = zeros(1,4);
+
+for i = 1:length(lambda)
+    for it = 1:N
+        [PL(it), APD(it), MPD(it), TT(it)] = Simulator2(lambda(i), C, f, P, b);
+    end
+    media_APD(i) = mean(APD);
+    term_APD(i) = norminv(1 - alpha / 2) * sqrt(var(APD) / N);
+    media_TT(i) = mean(TT);
+    term_TT(i) = norminv(1 - alpha / 2) * sqrt(var(TT) / N);
+end
+
+figure(5);
+bar(lambda, media_APD);
+hold on
+er = errorbar(lambda, media_APD, term_APD);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Packet Delay');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average packet delay (ms)');
+hold off
+
+figure(6);
+bar(lambda, media_TT);
+hold on
+er = errorbar(lambda, media_TT, term_TT);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Throughput');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average throughput (Mbps)');
+hold off
+
+
+%% 1 e) - Simulador 1 Novo
+
+lambda = [1000, 1300, 1600, 1900];
+C = 10;
+f = 1000000; 
+P = 100000; 
+N = 20;
+alpha = 0.1;
+
+PL = zeros(1, 4);
+APD = zeros(1,4);
+MPD = zeros(1,4);
+TT = zeros(1,4);
+
+media_APD = zeros(1,4);
+term_APD = zeros(1,4);
+media_TT = zeros(1,4);
+term_TT = zeros(1,4);
+
+for i = 1:length(lambda)
+    for it = 1:N
+        [PL(it), APD(it), MPD(it), TT(it)] = Simulator1_new(lambda(i), C, f, P);
+    end
+    media_APD(i) = mean(APD);
+    term_APD(i) = norminv(1 - alpha / 2) * sqrt(var(APD) / N);
+    media_TT(i) = mean(TT);
+    term_TT(i) = norminv(1 - alpha / 2) * sqrt(var(TT) / N);
+end
+
+figure(3);
+bar(lambda, media_APD);
+hold on
+er = errorbar(lambda, media_APD, term_APD);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Packet Delay');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average packet delay (ms)');
+hold off
+
+figure(4);
+bar(lambda, media_TT);
+hold on
+er = errorbar(lambda, media_TT, term_TT);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Throughput');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average throughput (Mbps)');
+hold off
+
+
+
+
+%% 1. e) - Simulador 2 Novo
+
+lambda = [1000, 1300, 1600, 1900];
+C = 10;
+f = 1000000; 
+P = 100000; 
+N = 20;
+alpha = 0.1;
+b = 10^-5;
+
+PL = zeros(1, 4);
+APD = zeros(1,4);
+MPD = zeros(1,4);
+TT = zeros(1,4);
+
+media_APD = zeros(1,4);
+term_APD = zeros(1,4);
+media_TT = zeros(1,4);
+term_TT = zeros(1,4);
+
+for i = 1:length(lambda)
+    for it = 1:N
+        [PL(it), APD(it), MPD(it), TT(it)] = Simulator2_new(lambda(i), C, f, P, b);
+    end
+    media_APD(i) = mean(APD);
+    term_APD(i) = norminv(1 - alpha / 2) * sqrt(var(APD) / N);
+    media_TT(i) = mean(TT);
+    term_TT(i) = norminv(1 - alpha / 2) * sqrt(var(TT) / N);
+end
+
+figure(5);
+bar(lambda, media_APD);
+hold on
+er = errorbar(lambda, media_APD, term_APD);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Packet Delay');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average packet delay (ms)');
+hold off
+
+figure(6);
+bar(lambda, media_TT);
+hold on
+er = errorbar(lambda, media_TT, term_TT);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+grid on
+title('Average Throughput');
+xlabel('Packet Arrival Rate (pps)');
+ylabel('Average throughput (Mbps)');
+hold off
+
+
+
+function W1 = Theo_Avg_Delay_MG1(lambda,C)
+    [es, es2] = ES_data(C);
+    W1 = (((lambda*es2 ) / (2 * (1 - lambda*es))) + es) * 1000;
+end
+
+function [es, es2] = ES_data(C)
+    k = (0.41/((109 - 65 + 1)+(1517 - 111 + 1)));
+    es = 0.19*((64*8)/(C*10^6)) + 0.23*((110*8)/(C*10^6)) + 0.17*((1518*8)/(C*10^6));
+    es2 = 0.19*((64*8)/(C*10^6))^2 + 0.23*((110*8)/(C*10^6))^2 + 0.17*((1518*8)/(C*10^6))^2;
+    for n = 65:109
+        es = es + k * ((n*8)/(C*10^6));
+        es2 = es2 + k * ((n * 8)/(C*10^6))^2;
+    end
+    for n = 111:1517
+         es = es + k * ((n*8)/(C*10^6));
+         es2 = es2 + k * ((n * 8)/(C*10^6))^2;
+    end
+end
